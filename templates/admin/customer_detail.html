@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold"><i class="bi bi-person-lines-fill me-2" style="color:var(--accent-violet);"></i>Customer <span class="text-gradient">Details</span></h3>
+    <a href="{{ url_for('admin_customers') }}" class="btn btn-outline-light rounded-pill px-3 btn-sm"><i class="bi bi-arrow-left me-1"></i>All Customers</a>
+</div>
+
+<form method="POST" action="{{ url_for('admin_view_customer', user_id=user.id) }}">
+<div class="row g-4">
+    <!-- Identity Info -->
+    <div class="col-lg-4">
+        <div class="glass-card p-4 mb-4">
+            <h5 class="mb-3"><i class="bi bi-shield-lock me-2" style="color:var(--accent-teal);"></i>Identity</h5>
+            <div class="glass-card-alt p-3 mb-2">
+                <small class="text-secondary d-block">User ID</small>
+                <span class="fw-semibold font-monospace">{{ user.id }}</span>
+            </div>
+            <div class="glass-card-alt p-3 mb-2">
+                <small class="text-secondary d-block">Username</small>
+                <span class="fw-semibold font-monospace">{{ user.username }}</span>
+            </div>
+            <div class="glass-card-alt p-3 mb-2">
+                <small class="text-secondary d-block">ID Proof</small>
+                <span class="fw-semibold">{{ user.id_proof_type or '—' }}: <span class="font-monospace">{{ user.id_proof_number or '—' }}</span></span>
+            </div>
+            <div class="glass-card-alt p-3 mb-2">
+                <small class="text-secondary d-block">Date of Birth</small>
+                <span class="fw-semibold">{{ user.dob or '—' }}</span>
+            </div>
+            <div class="glass-card-alt p-3 mb-2">
+                <small class="text-secondary d-block">Security Question</small>
+                <span class="fw-semibold">{{ user.security_question or 'Not set' }}</span>
+            </div>
+            <div class="glass-card-alt p-3">
+                <small class="text-secondary d-block">Member Since</small>
+                <span class="fw-semibold">{{ user.created_at.strftime('%d %B %Y') if user.created_at else '—' }}</span>
+            </div>
+        </div>
+
+        <!-- Account Status -->
+        <div class="glass-card p-4 mb-4">
+            <h5 class="mb-3"><i class="bi bi-toggle-on me-2" style="color:var(--accent-rose);"></i>Account Status</h5>
+            <select class="form-select rounded-pill px-4" name="status">
+                <option value="Active" {% if user.status == 'Active' %}selected{% endif %}>Active</option>
+                <option value="Frozen" {% if user.status == 'Frozen' %}selected{% endif %}>Frozen</option>
+            </select>
+            {% if user.frozen_until %}
+            <div class="form-text ms-2 mt-1 text-warning"><small>Frozen until: {{ user.frozen_until.strftime('%Y-%m-%d %H:%M') }}</small></div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Editable Fields -->
+    <div class="col-lg-8">
+        <!-- Personal Details -->
+        <div class="glass-card p-4 mb-4">
+            <h5 class="mb-3"><i class="bi bi-pencil-square me-2" style="color:var(--accent-amber);"></i>Personal Details</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label ms-1">First Name</label>
+                    <input type="text" class="form-control rounded-pill px-4" name="first_name" value="{{ user.first_name or '' }}" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label ms-1">Last Name</label>
+                    <input type="text" class="form-control rounded-pill px-4" name="last_name" value="{{ user.last_name or '' }}" required>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label ms-1">Gender</label>
+                    <select class="form-select rounded-pill px-4" name="gender">
+                        <option value="Male" {% if user.gender == 'Male' %}selected{% endif %}>Male</option>
+                        <option value="Female" {% if user.gender == 'Female' %}selected{% endif %}>Female</option>
+                        <option value="Other" {% if user.gender == 'Other' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label ms-1">Nationality</label>
+                    <select class="form-select rounded-pill px-4" name="nationality">
+                        <option value="Indian" {% if user.nationality == 'Indian' %}selected{% endif %}>Indian</option>
+                        <option value="Other" {% if user.nationality == 'Other' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Info -->
+        <div class="glass-card p-4 mb-4">
+            <h5 class="mb-3"><i class="bi bi-telephone me-2" style="color:var(--accent-sky);"></i>Contact Information</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label ms-1">Email</label>
+                    <input type="email" class="form-control rounded-pill px-4" name="email" value="{{ user.email }}" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label ms-1">Mobile (10 digits)</label>
+                    <input type="tel" class="form-control rounded-pill px-4" name="mobile_number" value="{{ user.mobile_number or '' }}" required pattern="\d{10}">
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label ms-1">Address</label>
+                <textarea class="form-control rounded-4 px-4 py-2" name="address" rows="2" required>{{ user.address or '' }}</textarea>
+            </div>
+        </div>
+
+        <!-- Employment -->
+        <div class="glass-card p-4 mb-4">
+            <h5 class="mb-3"><i class="bi bi-briefcase me-2" style="color:var(--accent-emerald);"></i>Employment</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label ms-1">Occupation Type</label>
+                    <select class="form-select rounded-pill px-4" name="occupation_type">
+                        <option value="Salaried" {% if user.occupation_type == 'Salaried' %}selected{% endif %}>Salaried</option>
+                        <option value="Self-Employed" {% if user.occupation_type == 'Self-Employed' %}selected{% endif %}>Self-Employed</option>
+                        <option value="Business" {% if user.occupation_type == 'Business' %}selected{% endif %}>Business</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label ms-1">Annual Income</label>
+                    <select class="form-select rounded-pill px-4" name="annual_income">
+                        <option value="Below 5 Lakhs" {% if user.annual_income == 'Below 5 Lakhs' %}selected{% endif %}>Below 5 Lakhs</option>
+                        <option value="5 - 8 Lakhs" {% if user.annual_income == '5 - 8 Lakhs' %}selected{% endif %}>5 - 8 Lakhs</option>
+                        <option value="8 - 12 Lakhs" {% if user.annual_income == '8 - 12 Lakhs' %}selected{% endif %}>8 - 12 Lakhs</option>
+                        <option value="12 - 30 Lakhs" {% if user.annual_income == '12 - 30 Lakhs' %}selected{% endif %}>12 - 30 Lakhs</option>
+                        <option value="30+ Lakhs" {% if user.annual_income == '30+ Lakhs' %}selected{% endif %}>30+ Lakhs</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end mb-4">
+            <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5"><i class="bi bi-check2-circle me-2"></i>Save Changes</button>
+        </div>
+    </div>
+</div>
+</form>
+
+<!-- Customer's Accounts -->
+<div class="glass-card p-4 mb-4">
+    <h5 class="mb-3"><i class="bi bi-credit-card me-2" style="color:var(--accent-teal);"></i>Bank Accounts</h5>
+    {% if accounts %}
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr class="text-secondary">
+                    <th><small>ACCOUNT NO</small></th>
+                    <th><small>TYPE</small></th>
+                    <th><small>BALANCE</small></th>
+                    <th><small>STATUS</small></th>
+                    <th><small>OPENED</small></th>
+                    <th><small>ACTION</small></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for acc in accounts %}
+                <tr>
+                    <td class="font-monospace">{{ acc.account_number }}</td>
+                    <td>{{ acc.type }}</td>
+                    <td class="font-monospace fw-semibold">₹{{ "%.2f"|format(acc.balance) }}</td>
+                    <td>
+                        {% if acc.status == 'Active' %}
+                            <span class="badge bg-success bg-opacity-25 text-success status-badge">Active</span>
+                        {% elif acc.status == 'Frozen' %}
+                            <span class="badge bg-warning bg-opacity-25 text-warning status-badge">Frozen</span>
+                        {% else %}
+                            <span class="badge bg-secondary status-badge">Closed</span>
+                        {% endif %}
+                    </td>
+                    <td><small class="text-secondary">{{ acc.opened_at.strftime('%d %b %Y') }}</small></td>
+                    <td>
+                        <a href="{{ url_for('admin_edit_account', account_id=acc.id) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">Edit</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="text-secondary text-center py-3 mb-0">No accounts found for this customer.</p>
+    {% endif %}
+</div>
+
+<!-- Customer's Loans -->
+<div class="glass-card p-4">
+    <h5 class="mb-3"><i class="bi bi-bank me-2" style="color:var(--accent-amber);"></i>Loan Applications</h5>
+    {% if loans %}
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr class="text-secondary">
+                    <th><small>TYPE</small></th>
+                    <th><small>AMOUNT</small></th>
+                    <th><small>TENURE</small></th>
+                    <th><small>RATE</small></th>
+                    <th><small>STATUS</small></th>
+                    <th><small>APPLIED</small></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for loan in loans %}
+                <tr>
+                    <td>{{ loan.type }}</td>
+                    <td class="font-monospace">₹{{ "%.2f"|format(loan.amount) }}</td>
+                    <td>{{ loan.tenure_months }} months</td>
+                    <td>{{ loan.interest_rate or 'TBD' }}{% if loan.interest_rate %}%{% endif %}</td>
+                    <td>
+                        {% if loan.status == 'Ongoing' %}
+                            <span class="badge bg-success bg-opacity-25 text-success status-badge">Ongoing</span>
+                        {% elif loan.status == 'Rejected' %}
+                            <span class="badge bg-danger bg-opacity-25 text-danger status-badge">Rejected</span>
+                        {% elif loan.status == 'Pending Approval' %}
+                            <span class="badge bg-warning bg-opacity-25 text-warning status-badge">Pending Approval</span>
+                        {% elif loan.status == 'Fully Paid' %}
+                            <span class="badge bg-info bg-opacity-25 text-info status-badge">Fully Paid</span>
+                        {% endif %}
+                    </td>
+                    <td><small class="text-secondary">{{ loan.created_at.strftime('%d %b %Y') }}</small></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="text-secondary text-center py-3 mb-0">No loan applications found.</p>
+    {% endif %}
+</div>
+{% endblock %}

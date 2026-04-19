@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-auto">
+        <div class="stat-icon teal mb-0"><i class="bi bi-person-badge"></i></div>
+    </div>
+    <div class="col">
+        <h3 class="fw-bold mb-0">Bank Staff Management</h3>
+        <p class="text-secondary mb-0">View and manage bank staff accounts</p>
+    </div>
+    <div class="col-auto">
+        <a href="{{ url_for('admin_staff_add') }}" class="btn btn-primary rounded-pill px-4"><i class="bi bi-plus-lg me-1"></i> Add New Staff</a>
+    </div>
+</div>
+
+<div class="glass-card p-4 mx-auto mb-4">
+    {% if staff %}
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th><small>STAFF ID</small></th>
+                    <th><small>FULL NAME</small></th>
+                    <th><small>USERNAME</small></th>
+                    <th><small>EMAIL</small></th>
+                    <th><small>STATUS</small></th>
+                    <th class="text-end"><small>ACTIONS</small></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in staff %}
+                <tr>
+                    <td class="font-monospace fw-semibold">{{ s.staff_id }}</td>
+                    <td>{{ s.first_name }} {{ s.last_name }}</td>
+                    <td>{{ s.username }}</td>
+                    <td>{{ s.email }}</td>
+                    <td>
+                        {% if s.status == 'Active' %}
+                            <span class="badge bg-success bg-opacity-25 text-success status-badge">Active</span>
+                        {% else %}
+                            <span class="badge bg-danger bg-opacity-25 text-danger status-badge">Frozen</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <form action="{{ url_for('admin_staff_toggle', user_id=s.id) }}" method="POST" class="d-inline">
+                            {% if s.status == 'Active' %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">Deactivate</button>
+                            {% else %}
+                                <button type="submit" class="btn btn-sm btn-outline-success rounded-pill px-3">Activate</button>
+                            {% endif %}
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <div class="text-center py-4">
+            <i class="bi bi-people text-secondary" style="font-size: 2rem;"></i>
+            <p class="text-secondary mt-2 mb-0">No bank staff found.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

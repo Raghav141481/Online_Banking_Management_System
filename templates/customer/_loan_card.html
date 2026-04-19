@@ -1,0 +1,35 @@
+<div class="glass-card-alt p-3 mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon {% if loan.type == 'Personal' %}violet{% elif loan.type == 'Home' %}teal{% else %}amber{% endif %}">
+                <i class="bi {% if loan.type == 'Personal' %}bi-person{% elif loan.type == 'Home' %}bi-house{% else %}bi-car-front{% endif %}"></i>
+            </div>
+            <div>
+                <span class="fw-semibold">{{ loan.type }} Loan</span>
+                <small class="text-secondary d-block">Applied: {{ loan.created_at.strftime('%d %b %Y') }}</small>
+            </div>
+        </div>
+        {% if loan.status == 'Ongoing' %}
+            <span class="badge bg-success bg-opacity-25 text-success status-badge">Ongoing</span>
+        {% elif loan.status == 'Fully Paid' %}
+            <span class="badge bg-info bg-opacity-25 text-info status-badge">Fully Paid</span>
+        {% elif loan.status == 'Rejected' %}
+            <span class="badge bg-danger bg-opacity-25 text-danger status-badge">Rejected</span>
+        {% else %}
+            <span class="badge bg-warning bg-opacity-25 text-warning status-badge">Pending Approval</span>
+        {% endif %}
+    </div>
+    <div class="row mt-2">
+        <div class="col-4">
+            <small class="text-secondary d-block">Amount</small>
+            <span class="font-monospace fw-semibold">₹{{ "%.2f"|format(loan.amount) }}</span>
+        </div>
+        <div class="col-4">
+            <small class="text-secondary d-block">Tenure</small>
+            <span>{{ loan.tenure_months }} months</span>
+        </div>
+        <div class="col-4 text-end">
+            <a href="{{ url_for('loan_details', loan_id=loan.id) }}" class="btn btn-sm btn-outline-light rounded-pill px-3 mt-1"><i class="bi bi-eye me-1"></i>Details</a>
+        </div>
+    </div>
+</div>

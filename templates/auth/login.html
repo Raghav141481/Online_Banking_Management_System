@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="glass-card p-5">
+            <div class="text-center mb-4">
+                <h2 class="fw-bold mb-2">Welcome Back</h2>
+                <p class="text-secondary">Sign in to your RANS Bank account</p>
+            </div>
+
+            <form method="POST" action="{{ url_for('login') }}">
+                <div class="mb-4">
+                    <label for="username" class="form-label ms-1">Username</label>
+                    <input type="text" class="form-control form-control-lg rounded-pill px-4" id="username" name="username" required>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="password" class="form-label ms-1">Password</label>
+                    <input type="password" class="form-control form-control-lg rounded-pill px-4" id="password" name="password" required>
+                </div>
+                
+                <div class="d-grid mt-5">
+                    <button type="submit" class="btn btn-primary btn-lg rounded-pill">Sign In</button>
+                </div>
+            </form>
+            
+            <div class="text-center mt-3">
+                <a href="{{ url_for('forgot_password') }}" class="text-secondary fw-medium"><i class="bi bi-shield-lock me-1"></i>Forgot Password?</a>
+            </div>
+
+            <div class="text-center mt-4 pt-3 border-top border-secondary border-opacity-25">
+                <p class="text-secondary mb-0">Don't have an account? <a href="{{ url_for('register') }}" class=" fw-medium">Register here</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

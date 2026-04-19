@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold"><i class="bi bi-bank me-2" style="color:var(--accent-amber);"></i>Loan <span class="text-gradient-warm">Management</span></h3>
+</div>
+
+<!-- Loan Summary Cards -->
+{% set ongoing_loans = loans|selectattr('status', 'equalto', 'Ongoing')|list %}
+{% set pending_loans_list = loans|selectattr('status', 'equalto', 'Pending Approval')|list %}
+{% set fully_paid_loans = loans|selectattr('status', 'equalto', 'Fully Paid')|list %}
+{% set rejected_loans = loans|selectattr('status', 'equalto', 'Rejected')|list %}
+<div class="row g-3 mb-4">
+    <div class="col-md-3 col-6">
+        <div class="stat-card amber">
+            <small class="text-secondary d-block mb-1">Ongoing Loans</small>
+            <h4 class="mb-0 font-monospace fw-bold">{{ ongoing_loans|length }}</h4>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card violet">
+            <small class="text-secondary d-block mb-1">Pending Approval</small>
+            <h4 class="mb-0 font-monospace fw-bold">{{ pending_loans_list|length }}</h4>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card rose">
+            <small class="text-secondary d-block mb-1">Total Borrowed</small>
+            <h4 class="mb-0 font-monospace fw-bold">₹{{ "%.0f"|format(ongoing_loans|sum(attribute='amount')) }}</h4>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card emerald">
+            <small class="text-secondary d-block mb-1">Total Applications</small>
+            <h4 class="mb-0 font-monospace fw-bold">{{ loans|length }}</h4>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Apply Form -->
+    <div class="col-lg-5">
+        <div class="glass-card p-4">
+            <h5 class="mb-4"><i class="bi bi-plus-circle me-2" style="color:var(--accent-teal);"></i>Apply for New Loan</h5>
+            <form method="POST" action="{{ url_for('customer_loans') }}">
+                <div class="mb-3">
+                    <label class="form-label ms-1">Loan Type</label>
+                    <select class="form-select rounded-pill px-4" name="type" required>
+                        <option value="Personal">Personal Loan (12% p.a.)</option>
+                        <option value="Home">Home Loan (8% p.a.)</option>
+                        <option value="Car">Car Loan (10% p.a.)</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label ms-1">Amount (₹)</label>
+                    <input type="number" step="0.01" min="1000" class="form-control rounded-pill px-4" name="amount" required placeholder="Min ₹1,000">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label ms-1">Tenure (Months)</label>
+                    <input type="number" min="6" max="360" class="form-control rounded-pill px-4" name="tenure" required placeholder="6 to 360 months">
+                </div>
+                <div class="mb-4">
+                    <label class="form-label ms-1">Purpose / Reason</label>
+                    <input type="text" class="form-control rounded-pill px-4" name="purpose" required>
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-accent-amber rounded-pill btn-lg"><i class="bi bi-send me-2"></i>Submit Application</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loan Applications List - Tabbed by Status -->
+    <div class="col-lg-7">
+        <div class="glass-card p-4">
+            <h5 class="mb-4"><i class="bi bi-list-check me-2 text-secondary"></i>My Applications</h5>
+            
+            <!-- Status Tabs -->
+            <ul class="nav nav-pills mb-4 gap-2 flex-wrap" id="loanTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active rounded-pill px-3 py-1" id="ongoing-tab" data-bs-toggle="tab" data-bs-target="#ongoing-pane" type="button" role="tab">
+                        <i class="bi bi-play-circle me-1"></i>Ongoing <span class="badge bg-light text-dark ms-1">{{ ongoing_loans|length }}</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link rounded-pill px-3 py-1" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending-pane" type="button" role="tab">
+                        <i class="bi bi-hourglass-split me-1"></i>Pending <span class="badge bg-light text-dark ms-1">{{ pending_loans_list|length }}</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link rounded-pill px-3 py-1" id="fullypaid-tab" data-bs-toggle="tab" data-bs-target="#fullypaid-pane" type="button" role="tab">
+                        <i class="bi bi-check-circle me-1"></i>Fully Paid <span class="badge bg-light text-dark ms-1">{{ fully_paid_loans|length }}</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link rounded-pill px-3 py-1" id="rejected-tab" data-bs-toggle="tab" data-bs-target="#rejected-pane" type="button" role="tab">
+                        <i class="bi bi-x-circle me-1"></i>Rejected <span class="badge bg-light text-dark ms-1">{{ rejected_loans|length }}</span>
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Tab Content -->
+            <div class="tab-content" id="loanTabContent">
+                <!-- Ongoing -->
+                <div class="tab-pane fade show active" id="ongoing-pane" role="tabpanel" tabindex="0">
+                    {% if ongoing_loans %}
+                        {% for loan in ongoing_loans %}
+                        {% include 'customer/_loan_card.html' %}
+                        {% endfor %}
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-check-circle text-secondary" style="font-size:2rem;"></i>
+                        <p class="text-secondary mt-2 mb-0">No ongoing loans.</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Pending Approval -->
+                <div class="tab-pane fade" id="pending-pane" role="tabpanel" tabindex="0">
+                    {% if pending_loans_list %}
+                        {% for loan in pending_loans_list %}
+                        {% include 'customer/_loan_card.html' %}
+                        {% endfor %}
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-hourglass text-secondary" style="font-size:2rem;"></i>
+                        <p class="text-secondary mt-2 mb-0">No pending applications.</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Fully Paid -->
+                <div class="tab-pane fade" id="fullypaid-pane" role="tabpanel" tabindex="0">
+                    {% if fully_paid_loans %}
+                        {% for loan in fully_paid_loans %}
+                        {% include 'customer/_loan_card.html' %}
+                        {% endfor %}
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-bank text-secondary" style="font-size:2rem;"></i>
+                        <p class="text-secondary mt-2 mb-0">No fully paid loans yet.</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Rejected -->
+                <div class="tab-pane fade" id="rejected-pane" role="tabpanel" tabindex="0">
+                    {% if rejected_loans %}
+                        {% for loan in rejected_loans %}
+                        {% include 'customer/_loan_card.html' %}
+                        {% endfor %}
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-emoji-smile text-secondary" style="font-size:2rem;"></i>
+                        <p class="text-secondary mt-2 mb-0">No rejected applications. Great!</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center mt-5 mb-5">
+    <div class="col-md-8 col-lg-6">
+        <div class="glass-card p-5">
+            <div class="text-center mb-4">
+                <h2 class="fw-bold mb-2">Open an Account</h2>
+                <p class="text-secondary">Step 3 of 4: Account & Nominee</p>
+                <div class="progress-custom mb-4">
+                    <div class="bar violet" style="width: 75%;"></div>
+                </div>
+            </div>
+
+            <form method="POST" action="{{ url_for('register_step3') }}">
+                <div class="mb-4 pb-4 border-bottom border-secondary border-opacity-25">
+                    <label class="form-label ms-1  fw-semibold">Desired Account Type</label>
+                    <select class="form-select form-select-lg rounded-pill px-4" name="account_type" required>
+                        <option value="Savings">Savings Account</option>
+                        <option value="Current">Current Account</option>
+                    </select>
+                </div>
+
+                <h5 class="mb-3" style="color:var(--accent-rose);"><i class="bi bi-people me-2"></i>Nominee Details</h5>
+
+                <div class="mb-3">
+                    <label class="form-label ms-1">Relationship to Nominee</label>
+                    <select class="form-select rounded-pill px-4" name="nominee_relation" id="nominee_relation" onchange="toggleNomineeFields()">
+                        <option value="">No Nominee</option>
+                        <option value="Spouse">Spouse</option>
+                        <option value="Parent">Parent</option>
+                        <option value="Child">Child</option>
+                        <option value="Sibling">Sibling</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div id="nominee_fields" style="display:none;">
+                    <div class="row mb-5">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label ms-1">Nominee ID Proof Type</label>
+                            <select class="form-select rounded-pill px-4" name="nominee_id_type" id="nominee_id_type">
+                                <option value="Aadhar">Aadhar</option>
+                                <option value="PAN">PAN</option>
+                                <option value="Driving License">Driving License</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label ms-1">Nominee ID Number</label>
+                            <input type="text" class="form-control rounded-pill px-4 font-monospace" name="nominee_id_number" id="nominee_id_number">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{{ url_for('register_step2') }}" class="btn btn-outline-secondary rounded-pill px-4"><i class="bi bi-arrow-left me-1"></i>Back</a>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">Continue to Setup <i class="bi bi-arrow-right ms-1"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleNomineeFields() {
+    var val = document.getElementById('nominee_relation').value;
+    var fields = document.getElementById('nominee_fields');
+    var idType = document.getElementById('nominee_id_type');
+    var idNum = document.getElementById('nominee_id_number');
+    if (val) {
+        fields.style.display = 'block';
+        idType.required = true;
+        idNum.required = true;
+    } else {
+        fields.style.display = 'none';
+        idType.required = false;
+        idNum.required = false;
+        idNum.value = '';
+    }
+}
+</script>
+{% endblock %}
+

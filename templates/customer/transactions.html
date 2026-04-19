@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Transaction <span class="text-gradient">History</span></h2>
+</div>
+
+<div class="glass-card p-4">
+    {% if transactions %}
+    <div class="table-responsive">
+        <table class="table  table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Date & Time</th>
+                    <th>Transaction ID</th>
+                    <th>Description</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tx in transactions %}
+                <tr>
+                    <td class="text-secondary"><small>{{ tx.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</small></td>
+                    <td class="font-monospace text-secondary"><small>{{ tx.transaction_id[:12] }}...</small></td>
+                    <td>{{ tx.description }}</td>
+                    
+                    <td class="font-monospace">
+                        {% if tx.sender_acc_num %}
+                            <div>{{ tx.sender_acc_num }}</div>
+                            <div class="small fw-normal text-muted" style="font-family: 'Inter', sans-serif">
+                                {{ tx.sender_first_name }} {{ tx.sender_last_name }}
+                                {% if tx.direction == 'Debit' %}
+                                    <span class="badge bg-secondary opacity-50 ms-1">Me</span>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <span class="text-secondary">-</span>
+                        {% endif %}
+                    </td>
+                    
+                    <td class="font-monospace">
+                        {% if tx.receiver_acc_num %}
+                            <div>{{ tx.receiver_acc_num }}</div>
+                            <div class="small fw-normal text-muted" style="font-family: 'Inter', sans-serif">
+                                {{ tx.recv_first_name }} {{ tx.recv_last_name }}
+                                {% if tx.direction == 'Credit' %}
+                                    <span class="badge bg-secondary opacity-50 ms-1">Me</span>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <span class="text-secondary">-</span>
+                        {% endif %}
+                    </td>
+                    
+                    <td>
+                        {% if tx.direction == 'Credit' %}
+                            <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 status-badge">CREDIT</span>
+                        {% else %}
+                            <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50 status-badge">DEBIT</span>
+                        {% endif %}
+                    </td>
+                    
+                    <td class="font-monospace">
+                        {% if tx.direction == 'Credit' %}
+                            <span class="text-success">+₹{{ "%.2f"|format(tx.amount) }}</span>
+                        {% else %}
+                            <span class="text-danger">-₹{{ "%.2f"|format(tx.amount) }}</span>
+                        {% endif %}
+                    </td>
+                    
+                    <td>
+                        {% if tx.status == 'Success' %}
+                            <span class="text-success"><small>Success</small></span>
+                        {% elif tx.status == 'Failed' %}
+                            <span class="text-danger"><small>Failed</small></span>
+                        {% else %}
+                            <span class="text-warning"><small>Pending</small></span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <p class="lead text-secondary mb-0">No transactions recorded yet.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

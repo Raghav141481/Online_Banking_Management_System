@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-auto">
+        <div class="stat-icon amber mb-0"><i class="bi bi-person-vcard"></i></div>
+    </div>
+    <div class="col">
+        <h3 class="fw-bold mb-0">Registration Request Details</h3>
+        <p class="text-secondary mb-0">Review all submitted information before approving or rejecting</p>
+    </div>
+    <div class="col-auto">
+        <a href="{{ url_for('staff_requests') }}" class="btn btn-outline-secondary rounded-pill px-3"><i class="bi bi-arrow-left me-1"></i>Back to Requests</a>
+    </div>
+</div>
+
+<!-- Personal Information -->
+<div class="glass-card p-4 mx-auto mb-4">
+    <h5 class="mb-3"><i class="bi bi-person me-2"></i>Personal Information</h5>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <small class="text-secondary d-block">Username</small>
+            <span class="fw-semibold">{{ user.username }}</span>
+        </div>
+        <div class="col-md-4">
+            <small class="text-secondary d-block">First Name</small>
+            <span class="fw-semibold">{{ user.first_name or '—' }}</span>
+        </div>
+        <div class="col-md-4">
+            <small class="text-secondary d-block">Last Name</small>
+            <span class="fw-semibold">{{ user.last_name or '—' }}</span>
+        </div>
+        <div class="col-md-4">
+            <small class="text-secondary d-block">Date of Birth</small>
+            <span class="fw-semibold">{{ user.dob.strftime('%Y-%m-%d') if user.dob else '—' }}</span>
+        </div>
+        <div class="col-md-4">
+            <small class="text-secondary d-block">Gender</small>
+            <span class="fw-semibold">{{ user.gender or '—' }}</span>
+        </div>
+        <div class="col-md-4">
+            <small class="text-secondary d-block">Nationality</small>
+            <span class="fw-semibold">{{ user.nationality or '—' }}</span>
+        </div>
+    </div>
+</div>
+
+<!-- Contact Information -->
+<div class="glass-card p-4 mx-auto mb-4">
+    <h5 class="mb-3"><i class="bi bi-envelope me-2"></i>Contact Information</h5>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <small class="text-secondary d-block">Email</small>
+            <span class="fw-semibold">{{ user.email }}</span>
+        </div>
+        <div class="col-md-4">
+            <small class="text-secondary d-block">Mobile Number</small>
+            <span class="fw-semibold">{{ user.mobile_number or '—' }}</span>
+        </div>
+        <div class="col-md-8">
+            <small class="text-secondary d-block">Address</small>
+            <span class="fw-semibold">{{ user.address or '—' }}</span>
+        </div>
+    </div>
+</div>
+
+<!-- Identity Verification -->
+<div class="glass-card p-4 mx-auto mb-4">
+    <h5 class="mb-3"><i class="bi bi-shield-check me-2"></i>Identity Verification</h5>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <small class="text-secondary d-block">ID Proof Type</small>
+            <span class="fw-semibold">{{ user.id_proof_type or '—' }}</span>
+        </div>
+        <div class="col-md-4">
+            <small class="text-secondary d-block">ID Proof Number</small>
+            <span class="fw-semibold font-monospace">{{ user.id_proof_number or '—' }}</span>
+        </div>
+        <div class="col-md-4">
+            <small class="text-secondary d-block">Application Date</small>
+            <span class="fw-semibold">{{ user.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+        </div>
+    </div>
+</div>
+
+<!-- Employment & Income -->
+<div class="glass-card p-4 mx-auto mb-4">
+    <h5 class="mb-3"><i class="bi bi-briefcase me-2"></i>Employment & Income</h5>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <small class="text-secondary d-block">Occupation Type</small>
+            <span class="fw-semibold">{{ user.occupation_type or '—' }}</span>
+        </div>
+        <div class="col-md-6">
+            <small class="text-secondary d-block">Annual Income</small>
+            <span class="fw-semibold">{{ user.annual_income or '—' }}</span>
+        </div>
+    </div>
+</div>
+
+<!-- Account & Nominee Details -->
+{% if account %}
+<div class="glass-card p-4 mx-auto mb-4">
+    <h5 class="mb-3"><i class="bi bi-bank me-2"></i>Requested Account & Nominee Details</h5>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <small class="text-secondary d-block">Account Type</small>
+            <span class="fw-semibold">{{ account.type }}</span>
+        </div>
+        <div class="col-md-4">
+            <small class="text-secondary d-block">Account Number</small>
+            <span class="fw-semibold font-monospace">{{ account.account_number }}</span>
+        </div>
+        <div class="col-md-4">
+            <small class="text-secondary d-block">Current Status</small>
+            <span class="badge bg-warning text-dark">{{ account.status }}</span>
+        </div>
+        {% if account.nominee_relation %}
+        <div class="col-12"><hr class="my-2"></div>
+        <div class="col-md-4">
+            <small class="text-secondary d-block">Nominee Relation</small>
+            <span class="fw-semibold">{{ account.nominee_relation }}</span>
+        </div>
+        <div class="col-md-4">
+            <small class="text-secondary d-block">Nominee ID Type</small>
+            <span class="fw-semibold">{{ account.nominee_id_type or '—' }}</span>
+        </div>
+        <div class="col-md-4">
+            <small class="text-secondary d-block">Nominee ID Number</small>
+            <span class="fw-semibold font-monospace">{{ account.nominee_id_number or '—' }}</span>
+        </div>
+        {% else %}
+        <div class="col-12">
+            <small class="text-secondary">No nominee details provided.</small>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Security -->
+<div class="glass-card p-4 mx-auto mb-4">
+    <h5 class="mb-3"><i class="bi bi-lock me-2"></i>Security</h5>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <small class="text-secondary d-block">Security Question</small>
+            <span class="fw-semibold">{{ user.security_question or '—' }}</span>
+        </div>
+        <div class="col-md-6">
+            <small class="text-secondary d-block">Security Answer</small>
+            <span class="fw-semibold text-muted">[Hashed – not visible]</span>
+        </div>
+    </div>
+</div>
+
+<!-- Action Buttons -->
+<div class="glass-card p-4 mx-auto mb-4">
+    <h5 class="mb-3"><i class="bi bi-check2-circle me-2"></i>Decision</h5>
+    <div class="d-flex gap-3 flex-wrap">
+        <form action="{{ url_for('handle_user_request', user_id=user.id, action='approve') }}" method="POST" class="d-inline">
+            <button class="btn btn-success rounded-pill px-4 py-2"><i class="bi bi-check-lg me-1"></i>Approve Registration</button>
+        </form>
+        <form action="{{ url_for('handle_user_request', user_id=user.id, action='reject') }}" method="POST" class="d-inline" onsubmit="return confirm('Reject this registration? This will permanently delete the request.');">
+            <button class="btn btn-outline-danger rounded-pill px-4 py-2"><i class="bi bi-x-lg me-1"></i>Reject Registration</button>
+        </form>
+        <a href="{{ url_for('staff_requests') }}" class="btn btn-outline-secondary rounded-pill px-4 py-2"><i class="bi bi-arrow-left me-1"></i>Back</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-people-fill me-2" style="color:var(--accent-violet);"></i>Customer <span class="text-gradient">Management</span></h2>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-light rounded-pill px-3 btn-sm"><i class="bi bi-arrow-left me-1"></i>Dashboard</a>
+</div>
+
+<div class="glass-card p-4">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr class="text-secondary">
+                    <th><small>ID</small></th>
+                    <th><small>NAME</small></th>
+                    <th><small>USERNAME</small></th>
+                    <th><small>EMAIL</small></th>
+                    <th><small>MOBILE</small></th>
+                    <th><small>ACCOUNTS</small></th>
+                    <th><small>STATUS</small></th>
+                    <th><small>JOINED</small></th>
+                    <th><small>ACTION</small></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in customers %}
+                <tr>
+                    <td class="font-monospace text-secondary">{{ c.id }}</td>
+                    <td class="fw-semibold">{{ c.first_name or '' }} {{ c.last_name or '' }}</td>
+                    <td class="font-monospace">{{ c.username }}</td>
+                    <td><small>{{ c.email }}</small></td>
+                    <td class="font-monospace"><small>{{ c.mobile_number or '—' }}</small></td>
+                    <td class="text-center">
+                        <span class="badge bg-secondary bg-opacity-50">{{ c.account_count }}</span>
+                    </td>
+                    <td>
+                        {% if c.status == 'Active' %}
+                            <span class="badge bg-success bg-opacity-25 text-success status-badge">Active</span>
+                        {% else %}
+                            <span class="badge bg-danger bg-opacity-25 text-danger status-badge">Frozen</span>
+                        {% endif %}
+                    </td>
+                    <td><small class="text-secondary">{{ c.created_at.strftime('%d %b %Y') }}</small></td>
+                    <td>
+                        <a href="{{ url_for('admin_view_customer', user_id=c.id) }}" class="btn btn-sm btn-outline-light rounded-pill px-3">
+                            <i class="bi bi-eye me-1"></i>View / Edit
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if not customers %}
+    <div class="text-center py-5">
+        <i class="bi bi-people text-secondary" style="font-size: 2rem;"></i>
+        <p class="text-secondary mt-2 mb-0">No customers registered yet.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

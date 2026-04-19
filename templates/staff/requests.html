@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-auto">
+        <div class="stat-icon amber mb-0"><i class="bi bi-person-lines-fill"></i></div>
+    </div>
+    <div class="col">
+        <h3 class="fw-bold mb-0">Approval Requests</h3>
+        <p class="text-secondary mb-0">Manage new customer registrations and account openings</p>
+    </div>
+</div>
+
+<div class="glass-card p-4 mx-auto mb-4">
+    <h5 class="mb-3">New Customer Registrations</h5>
+    {% if pending_users %}
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th><small>USERNAME</small></th>
+                    <th><small>FULL NAME</small></th>
+                    <th><small>EMAIL</small></th>
+                    <th><small>ID PROOF</small></th>
+                    <th><small>DATE</small></th>
+                    <th class="text-end"><small>ACTIONS</small></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in pending_users %}
+                <tr>
+                    <td><span class="fw-semibold">{{ u.username }}</span></td>
+                    <td>{{ u.first_name }} {{ u.last_name }}</td>
+                    <td>{{ u.email }}</td>
+                    <td><small>{{ u.id_proof_type }}: {{ u.id_proof_number }}</small></td>
+                    <td><small>{{ u.created_at.strftime('%Y-%m-%d %H:%M') }}</small></td>
+                    <td class="text-end">
+                        <a href="{{ url_for('staff_view_request_details', user_id=u.id) }}" class="btn btn-sm btn-info rounded-pill px-3 me-1"><i class="bi bi-eye"></i> View Details</a>
+                        <form action="{{ url_for('handle_user_request', user_id=u.id, action='approve') }}" method="POST" class="d-inline">
+                            <button class="btn btn-sm btn-success rounded-pill px-3 me-1">Approve</button>
+                        </form>
+                        <form action="{{ url_for('handle_user_request', user_id=u.id, action='reject') }}" method="POST" class="d-inline" onsubmit="return confirm('Reject this registration? This will delete the request permanently.');">
+                            <button class="btn btn-sm btn-outline-danger rounded-pill px-3">Reject</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <p class="text-secondary mb-0">No pending customer registrations.</p>
+    {% endif %}
+</div>
+
+<div class="glass-card p-4 mx-auto">
+    <h5 class="mb-3">Additional Account Requests</h5>
+    {% if pending_accounts %}
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th><small>ACCOUNT NO</small></th>
+                    <th><small>TYPE</small></th>
+                    <th><small>USERNAME</small></th>
+                    <th><small>EMAIL</small></th>
+                    <th><small>REQUEST DATE</small></th>
+                    <th class="text-end"><small>ACTIONS</small></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in pending_accounts %}
+                <tr>
+                    <td class="font-monospace fw-semibold">{{ a.account_number }}</td>
+                    <td>{{ a.type }}</td>
+                    <td>{{ a.username }}</td>
+                    <td>{{ a.email }}</td>
+                    <td><small>{{ a.opened_at.strftime('%Y-%m-%d %H:%M') }}</small></td>
+                    <td class="text-end">
+                        <form action="{{ url_for('handle_account_request', account_id=a.id, action='approve') }}" method="POST" class="d-inline">
+                            <button class="btn btn-sm btn-success rounded-pill px-3 me-1">Approve</button>
+                        </form>
+                        <form action="{{ url_for('handle_account_request', account_id=a.id, action='reject') }}" method="POST" class="d-inline" onsubmit="return confirm('Reject this account request? This will permanently delete it.');">
+                            <button class="btn btn-sm btn-outline-danger rounded-pill px-3">Reject</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <p class="text-secondary mb-0">No pending additional account requests.</p>
+    {% endif %}
+</div>
+{% endblock %}

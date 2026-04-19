@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold"><i class="bi bi-person-circle me-2" style="color:var(--accent-violet);"></i>My <span class="text-gradient">Profile</span></h3>
+</div>
+
+<form method="POST" action="{{ url_for('customer_profile') }}">
+<div class="row g-4">
+    <!-- Personal Info (Read-Only) -->
+    <div class="col-lg-4">
+        <div class="glass-card p-4 mb-4">
+            <h5 class="mb-3"><i class="bi bi-shield-lock me-2" style="color:var(--accent-teal);"></i>Identity (Read Only)</h5>
+            <div class="glass-card-alt p-3 mb-2">
+                <small class="text-secondary d-block">Full Name</small>
+                <span class="fw-semibold">{{ user.first_name }} {{ user.last_name }}</span>
+            </div>
+            <div class="glass-card-alt p-3 mb-2">
+                <small class="text-secondary d-block">Username</small>
+                <span class="fw-semibold font-monospace">{{ user.username }}</span>
+            </div>
+            <div class="glass-card-alt p-3 mb-2">
+                <small class="text-secondary d-block">Date of Birth</small>
+                <span class="fw-semibold">{{ user.dob }}</span>
+            </div>
+            <div class="glass-card-alt p-3 mb-2">
+                <small class="text-secondary d-block">Gender</small>
+                <span class="fw-semibold">{{ user.gender }}</span>
+            </div>
+            <div class="glass-card-alt p-3 mb-2">
+                <small class="text-secondary d-block">Nationality</small>
+                <span class="fw-semibold">{{ user.nationality }}</span>
+            </div>
+            <div class="glass-card-alt p-3 mb-2">
+                <small class="text-secondary d-block">ID Proof</small>
+                <span class="fw-semibold">{{ user.id_proof_type }}: <span class="font-monospace">{{ user.id_proof_number }}</span></span>
+            </div>
+            <div class="glass-card-alt p-3">
+                <small class="text-secondary d-block">Member Since</small>
+                <span class="fw-semibold">{{ user.created_at.strftime('%d %B %Y') }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Editable Fields -->
+    <div class="col-lg-8">
+        <!-- Contact & Address -->
+        <div class="glass-card p-4 mb-4">
+            <h5 class="mb-3"><i class="bi bi-pencil-square me-2" style="color:var(--accent-amber);"></i>Contact & Address</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label ms-1">Email ID</label>
+                    <input type="email" class="form-control rounded-pill px-4" name="email" value="{{ user.email }}" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label ms-1">Mobile Number (10 digits)</label>
+                    <input type="tel" class="form-control rounded-pill px-4" name="mobile_number" value="{{ user.mobile_number or '' }}" required pattern="\d{10}">
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label ms-1">Address</label>
+                <textarea class="form-control rounded-4 px-4 py-2" name="address" rows="2" required>{{ user.address or '' }}</textarea>
+            </div>
+        </div>
+
+        <!-- Employment -->
+        <div class="glass-card p-4 mb-4">
+            <h5 class="mb-3"><i class="bi bi-briefcase me-2" style="color:var(--accent-emerald);"></i>Employment Details</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label ms-1">Occupation Type</label>
+                    <select class="form-select rounded-pill px-4" name="occupation_type" required>
+                        <option value="Salaried" {% if user.occupation_type == 'Salaried' %}selected{% endif %}>Salaried</option>
+                        <option value="Self-Employed" {% if user.occupation_type == 'Self-Employed' %}selected{% endif %}>Self-Employed</option>
+                        <option value="Business" {% if user.occupation_type == 'Business' %}selected{% endif %}>Business</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label ms-1">Annual Income</label>
+                    <select class="form-select rounded-pill px-4" name="annual_income" required>
+                        <option value="Below 5 Lakhs" {% if user.annual_income == 'Below 5 Lakhs' %}selected{% endif %}>Below 5 Lakhs</option>
+                        <option value="5 - 8 Lakhs" {% if user.annual_income == '5 - 8 Lakhs' %}selected{% endif %}>5 - 8 Lakhs</option>
+                        <option value="8 - 12 Lakhs" {% if user.annual_income == '8 - 12 Lakhs' %}selected{% endif %}>8 - 12 Lakhs</option>
+                        <option value="12 - 30 Lakhs" {% if user.annual_income == '12 - 30 Lakhs' %}selected{% endif %}>12 - 30 Lakhs</option>
+                        <option value="30+ Lakhs" {% if user.annual_income == '30+ Lakhs' %}selected{% endif %}>30+ Lakhs</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nominee -->
+        <div class="glass-card p-4 mb-4">
+            <h5 class="mb-3"><i class="bi bi-people me-2" style="color:var(--accent-rose);"></i>Nominee Details</h5>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label ms-1">Relationship</label>
+                    <select class="form-select rounded-pill px-4" name="nominee_relation" id="nominee_relation" onchange="toggleNominee()">
+                        <option value="">No Nominee</option>
+                        <option value="Spouse" {% if account and account.nominee_relation == 'Spouse' %}selected{% endif %}>Spouse</option>
+                        <option value="Parent" {% if account and account.nominee_relation == 'Parent' %}selected{% endif %}>Parent</option>
+                        <option value="Child" {% if account and account.nominee_relation == 'Child' %}selected{% endif %}>Child</option>
+                        <option value="Sibling" {% if account and account.nominee_relation == 'Sibling' %}selected{% endif %}>Sibling</option>
+                        <option value="Other" {% if account and account.nominee_relation == 'Other' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3" id="nominee_id_type_div">
+                    <label class="form-label ms-1">Nominee ID Type</label>
+                    <select class="form-select rounded-pill px-4" name="nominee_id_type">
+                        <option value="Aadhar" {% if account and account.nominee_id_type == 'Aadhar' %}selected{% endif %}>Aadhar</option>
+                        <option value="PAN" {% if account and account.nominee_id_type == 'PAN' %}selected{% endif %}>PAN</option>
+                        <option value="Driving License" {% if account and account.nominee_id_type == 'Driving License' %}selected{% endif %}>Driving License</option>
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3" id="nominee_id_num_div">
+                    <label class="form-label ms-1">Nominee ID Number</label>
+                    <input type="text" class="form-control rounded-pill px-4 font-monospace" name="nominee_id_number" value="{{ account.nominee_id_number if account and account.nominee_id_number else '' }}">
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5"><i class="bi bi-check2-circle me-2"></i>Save Changes</button>
+        </div>
+    </div>
+</div>
+</form>
+
+<script>
+function toggleNominee() {
+    var val = document.getElementById('nominee_relation').value;
+    document.getElementById('nominee_id_type_div').style.display = val ? 'block' : 'none';
+    document.getElementById('nominee_id_num_div').style.display = val ? 'block' : 'none';
+}
+toggleNominee();
+</script>
+{% endblock %}
+

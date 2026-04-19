@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold"><i class="bi bi-chat-dots me-2" style="color:var(--accent-rose);"></i>Ticket <span class="text-gradient-warm">#{{ "%04d"|format(ticket.id) }}</span></h3>
+    {% if session['user_role'] == 'Customer' %}
+        <a href="{{ url_for('customer_tickets') }}" class="btn btn-outline-light rounded-pill px-3 btn-sm"><i class="bi bi-arrow-left me-1"></i>Back</a>
+    {% else %}
+        <a href="{{ url_for('staff_tickets') }}" class="btn btn-outline-light rounded-pill px-3 btn-sm"><i class="bi bi-arrow-left me-1"></i>Back</a>
+    {% endif %}
+</div>
+
+<div class="row g-4">
+    <!-- Ticket Info -->
+    <div class="col-lg-4">
+        <div class="glass-card p-4">
+            <div class="glass-card-alt p-3 mb-3">
+                <small class="text-secondary d-block">Subject</small>
+                <span class="fw-bold">{{ ticket.subject }}</span>
+            </div>
+            <div class="glass-card-alt p-3 mb-3">
+                <small class="text-secondary d-block">Category</small>
+                <span><i class="bi bi-tag me-1"></i>{{ ticket.category }}</span>
+            </div>
+            <div class="glass-card-alt p-3 mb-3">
+                <small class="text-secondary d-block">Status</small>
+                {% if ticket.status == 'Open' %}
+                    <span class="badge bg-danger bg-opacity-25 text-danger status-badge">Open</span>
+                {% elif ticket.status == 'In Progress' %}
+                    <span class="badge bg-warning bg-opacity-25 text-warning status-badge">In Progress</span>
+                {% elif ticket.status == 'Resolved' %}
+                    <span class="badge bg-success bg-opacity-25 text-success status-badge">Resolved</span>
+                {% else %}
+                    <span class="badge bg-secondary bg-opacity-25 text-secondary status-badge">Closed</span>
+                {% endif %}
+            </div>
+            <div class="glass-card-alt p-3 mb-3">
+                <small class="text-secondary d-block">Original Description</small>
+                <p class="mb-0 mt-1" style="font-size:.9rem;">{{ ticket.description }}</p>
+            </div>
+
+            {% if session['user_role'] != 'Customer' %}
+            <!-- Status Update for Staff -->
+            <hr class="border-secondary border-opacity-25">
+            <small class="text-secondary d-block mb-2">Update Status:</small>
+            <form method="POST" action="{{ url_for('view_ticket', ticket_id=ticket.id) }}">
+                <input type="hidden" name="message" value="Status updated by staff.">
+                <div class="d-flex gap-2">
+                    <select name="status" class="form-select form-select-sm   rounded-pill">
+                        <option value="Open" {% if ticket.status == 'Open' %}selected{% endif %}>Open</option>
+                        <option value="In Progress" {% if ticket.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                        <option value="Resolved" {% if ticket.status == 'Resolved' %}selected{% endif %}>Resolved</option>
+                        <option value="Closed" {% if ticket.status == 'Closed' %}selected{% endif %}>Closed</option>
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-accent-amber rounded-pill px-3">Update</button>
+                </div>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Chat Thread -->
+    <div class="col-lg-8">
+        <div class="glass-card p-4 d-flex flex-column" style="min-height:550px;">
+            <h5 class="mb-3 pb-2 border-bottom border-secondary border-opacity-25"><i class="bi bi-chat-left-text me-2 text-secondary"></i>Conversation</h5>
+
+            <div class="flex-grow-1 overflow-auto d-flex flex-column gap-3 pe-2 mb-4" style="max-height:380px;">
+                {% if messages %}
+                    {% for msg in messages %}
+                        <div class="chat-bubble {% if msg.sender_role == 'Customer' %}customer{% else %}staff{% endif %}">
+                            <div class="d-flex justify-content-between mb-1">
+                                <small class="fw-bold {% if msg.sender_role == 'Customer' %}text-info{% else %}text-success{% endif %}">
+                                    <i class="bi {% if msg.sender_role == 'Customer' %}bi-person{% else %}bi-headset{% endif %} me-1"></i>{{ msg.sender_role }}
+                                </small>
+                                <small class="text-secondary ms-3">{{ msg.timestamp.strftime('%H:%M • %d %b') }}</small>
+                            </div>
+                            <p class="mb-0">{{ msg.message }}</p>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center my-auto">
+                        <i class="bi bi-chat-square text-secondary" style="font-size:2rem;"></i>
+                        <p class="text-secondary mt-2">No replies yet. Our team will respond soon.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if ticket.status != 'Closed' %}
+            <form method="POST" action="{{ url_for('view_ticket', ticket_id=ticket.id) }}" class="mt-auto pt-3 border-top border-secondary border-opacity-25">
+                <div class="input-group">
+                    <input type="text" name="message" class="form-control rounded-start-pill px-4   border-secondary" placeholder="Type your message..." required autocomplete="off">
+                    <button class="btn btn-primary px-4 rounded-end-pill" type="submit"><i class="bi bi-send me-1"></i>Send</button>
+                </div>
+            </form>
+            {% else %}
+            <div class="mt-auto pt-3 border-top border-secondary border-opacity-25 text-center">
+                <span class="text-secondary"><i class="bi bi-lock me-1"></i>This ticket is closed. No further replies.</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

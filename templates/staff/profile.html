@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="glass-card p-5 mt-4">
+            <h4 class="fw-bold mb-4"><i class="bi bi-person-badge text-gradient me-2"></i>Staff Profile</h4>
+            
+            <form action="{{ url_for('staff_profile') }}" method="POST">
+                <div class="mb-3">
+                    <label class="form-label text-secondary small mb-1">Staff ID</label>
+                    <input type="text" class="form-control border-0 bg-light" value="{{ user.staff_id }}" disabled readonly>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <label class="form-label text-secondary small mb-1">First Name</label>
+                        <input type="text" class="form-control border-0 bg-light" value="{{ user.first_name }}" disabled readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary small mb-1">Last Name</label>
+                        <input type="text" class="form-control border-0 bg-light" value="{{ user.last_name }}" disabled readonly>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <label class="form-label text-secondary small mb-1">Username</label>
+                        <input type="text" class="form-control border-0 bg-light" value="{{ user.username }}" disabled readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary small mb-1">Date of Birth</label>
+                        <input type="text" class="form-control border-0 bg-light" value="{{ user.dob }}" disabled readonly>
+                    </div>
+                </div>
+
+                <hr class="my-4 text-secondary opacity-25">
+                
+                <div class="mb-4">
+                    <label class="form-label text-secondary small mb-1">Email Address</label>
+                    <input type="email" name="email" class="form-control border-0 border-bottom border-primary rounded-0 px-2 py-2 shadow-none" value="{{ user.email }}" required>
+                    <div class="form-text mt-2"><i class="bi bi-info-circle me-1"></i>You can update your email address. Other profile details require administrator privileges to change.</div>
+                </div>
+                
+                <div class="text-end mt-4">
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">Update Profile</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

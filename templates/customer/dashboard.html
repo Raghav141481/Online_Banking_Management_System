@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Welcome -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-1">Welcome back, <span class="text-gradient">{{ session['username'] }}</span></h3>
+        <p class="text-secondary mb-0"><i class="bi bi-calendar3 me-1"></i>{{ now.strftime('%A, %d %B %Y') if now else 'Today' }}</p>
+    </div>
+</div>
+
+<!-- Overview Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3 col-6">
+        <div class="stat-card violet">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <small class="text-secondary d-block mb-1">Total Balance</small>
+                    <h4 class="mb-0 font-monospace fw-bold">₹{{ "%.2f"|format(total_balance) }}</h4>
+                </div>
+                <div class="stat-icon violet"><i class="bi bi-wallet2"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card teal">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <small class="text-secondary d-block mb-1">Active Accounts</small>
+                    <h4 class="mb-0 font-monospace fw-bold">{{ accounts|selectattr('status', 'equalto', 'Active')|list|length }}</h4>
+                </div>
+                <div class="stat-icon teal"><i class="bi bi-credit-card-2-front"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card amber">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <small class="text-secondary d-block mb-1">Recent Transactions</small>
+                    <h4 class="mb-0 font-monospace fw-bold">{{ recent_txs|length }}</h4>
+                </div>
+                <div class="stat-icon amber"><i class="bi bi-arrow-left-right"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card emerald">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <small class="text-secondary d-block mb-1">Savings Rate</small>
+                    <h4 class="mb-0 font-monospace fw-bold">4.5% <small class="text-secondary">p.a.</small></h4>
+                </div>
+                <div class="stat-icon emerald"><i class="bi bi-graph-up-arrow"></i></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Account Summary -->
+    <div class="col-lg-7">
+        <div class="glass-card p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0"><i class="bi bi-credit-card-2-front me-2 text-secondary"></i>Account Summary</h5>
+                <a href="{{ url_for('customer_open_account') }}" class="btn btn-sm btn-outline-light rounded-pill px-3">Open New Account</a>
+            </div>
+            {% if accounts %}
+                {% for acc in accounts %}
+                <div class="glass-card-alt p-3 mb-2 d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="stat-icon {% if acc.type == 'Savings' %}teal{% else %}violet{% endif %}">
+                            <i class="bi {% if acc.type == 'Savings' %}bi-piggy-bank{% else %}bi-briefcase{% endif %}"></i>
+                        </div>
+                        <div>
+                            <span class="d-block fw-semibold">{{ acc.type }} Account</span>
+                            <small class="font-monospace text-secondary">{{ acc.account_number }}</small>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <span class="d-block fw-bold font-monospace">₹{{ "%.2f"|format(acc.balance) }}</span>
+                        {% if acc.status == 'Active' %}
+                            <small class="text-success"><i class="bi bi-check-circle-fill"></i> Active</small>
+                        {% elif acc.status == 'Frozen' %}
+                            <small class="text-warning"><i class="bi bi-snow"></i> Frozen</small>
+                        {% else %}
+                            <small class="text-secondary"><i class="bi bi-x-circle"></i> Closed</small>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-inbox text-secondary" style="font-size: 2rem;"></i>
+                    <p class="text-secondary mt-2 mb-0">No accounts yet. Please wait for the bank staff to open one for you.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Notifications -->
+    <div class="col-lg-5">
+        <div class="glass-card p-4 mb-4">
+            <h5 class="mb-3"><i class="bi bi-bell-fill me-2" style="color: var(--accent-rose);"></i>Notifications</h5>
+            {% if accounts|selectattr('status', 'equalto', 'Frozen')|list|length > 0 %}
+                <div class="notif-card urgent">
+                    <small class="text-danger fw-semibold"><i class="bi bi-exclamation-triangle-fill me-1"></i>Frozen Account</small>
+                    <p class="mb-0 mt-1" style="font-size:.85rem;">One or more of your accounts is frozen. Contact support.</p>
+                </div>
+            {% endif %}
+            <div class="notif-card info">
+                <small style="color:var(--accent-sky);" class="fw-semibold"><i class="bi bi-info-circle-fill me-1"></i>Welcome</small>
+                <p class="mb-0 mt-1" style="font-size:.85rem;">Thank you for banking with RANS Bank. Explore your dashboard!</p>
+            </div>
+            <div class="notif-card warn">
+                <small class="text-warning fw-semibold"><i class="bi bi-shield-lock-fill me-1"></i>Security Tip</small>
+                <p class="mb-0 mt-1" style="font-size:.85rem;">Never share your OTP or password with anyone.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Transactions -->
+<div class="glass-card p-4">
+    <h5 class="mb-3 d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-clock-history me-2 text-secondary"></i>Recent Transactions</span>
+        <a href="{{ url_for('customer_transactions') }}" class="btn btn-sm btn-outline-light rounded-pill px-3">View All</a>
+    </h5>
+    {% if recent_txs %}
+    <div class="table-responsive">
+        <table class="table  table-hover mb-0 align-middle">
+            <thead>
+                <tr class="text-secondary">
+                    <th><small>REFERENCE</small></th>
+                    <th><small>DATE</small></th>
+                    <th><small>DESCRIPTION</small></th>
+                    <th class="text-end"><small>AMOUNT</small></th>
+                    <th class="text-center"><small>STATUS</small></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tx in recent_txs %}
+                <tr>
+                    <td class="font-monospace text-secondary"><small>{{ tx.transaction_id[:8] }}</small></td>
+                    <td><small>{{ tx.timestamp.strftime('%d %b %H:%M') }}</small></td>
+                    <td>{{ tx.description or 'Fund Transfer' }}</td>
+                    <td class="text-end font-monospace fw-semibold {% if tx.direction == 'Credit' %}text-success{% else %}text-danger{% endif %}">
+                        {% if tx.direction == 'Credit' %}+{% else %}-{% endif %}₹{{ "%.2f"|format(tx.amount) }}
+                    </td>
+                    <td class="text-center">
+                        {% if tx.status == 'Success' %}
+                            <span class="badge bg-success bg-opacity-25 text-success status-badge">Success</span>
+                        {% elif tx.status == 'Failed' %}
+                            <span class="badge bg-danger bg-opacity-25 text-danger status-badge">Failed</span>
+                        {% else %}
+                            <span class="badge bg-warning bg-opacity-25 text-warning status-badge">Pending</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="text-center py-4">
+        <i class="bi bi-receipt text-secondary" style="font-size: 2rem;"></i>
+        <p class="text-secondary mt-2 mb-0">No recent transactions.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

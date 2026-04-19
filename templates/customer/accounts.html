@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Your <span class="text-gradient">Accounts</span></h2>
+    <a href="{{ url_for('customer_open_account') }}" class="btn btn-primary rounded-pill px-4"><i class="bi bi-plus-lg me-1"></i>Open New Account</a>
+</div>
+
+<div class="glass-card p-4">
+    {% if accounts %}
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        {% for acc in accounts %}
+        <div class="col">
+            <div class="card h-100 bg-transparent border-secondary border-opacity-50 " style="backdrop-filter: blur(5px);">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="badge bg-secondary opacity-75">{{ acc.type }}</span>
+                        {% if acc.status == 'Active' %}
+                            <span class="badge bg-success status-badge shadow-sm">Active</span>
+                        {% elif acc.status == 'Pending' %}
+                            <span class="badge bg-info status-badge shadow-sm">Pending</span>
+                        {% elif acc.status == 'Frozen' %}
+                            <span class="badge bg-warning text-dark status-badge shadow-sm">Frozen</span>
+                        {% else %}
+                            <span class="badge bg-danger status-badge shadow-sm">Closed</span>
+                        {% endif %}
+                    </div>
+                    <p class="text-secondary mb-1">Account Number</p>
+                    <h4 class="font-monospace mb-4">{{ acc.account_number }}</h4>
+                    
+                    <p class="text-secondary mb-1">Available Balance</p>
+                    <h2 class="mb-0 text-gradient">₹{{ "%.2f"|format(acc.balance) }}</h2>
+                </div>
+                <div class="card-footer bg-transparent border-secondary border-opacity-25 d-flex justify-content-between">
+                    <small class="text-secondary">Opened: {{ acc.opened_at.strftime('%Y-%m-%d') }}</small>
+                    <a href="#" class="text-decoration-none text-info">View Statement &rarr;</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <p class="lead text-secondary mb-0">No active accounts found.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Review <span class="text-gradient">Loans</span></h2>
+</div>
+
+<!-- Status Tabs -->
+{% set pending_loans = loans|selectattr('status', 'equalto', 'Pending Approval')|list %}
+{% set ongoing_loans = loans|selectattr('status', 'equalto', 'Ongoing')|list %}
+{% set fullypaid_loans = loans|selectattr('status', 'equalto', 'Fully Paid')|list %}
+{% set rejected_loans = loans|selectattr('status', 'equalto', 'Rejected')|list %}
+
+<div class="glass-card p-4">
+    <ul class="nav nav-pills mb-4 gap-2 flex-wrap" id="staffLoanTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active rounded-pill px-3 py-1" id="s-pending-tab" data-bs-toggle="tab" data-bs-target="#s-pending-pane" type="button" role="tab">
+                <i class="bi bi-hourglass-split me-1"></i>Pending Approval <span class="badge bg-light text-dark ms-1">{{ pending_loans|length }}</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link rounded-pill px-3 py-1" id="s-ongoing-tab" data-bs-toggle="tab" data-bs-target="#s-ongoing-pane" type="button" role="tab">
+                <i class="bi bi-play-circle me-1"></i>Ongoing <span class="badge bg-light text-dark ms-1">{{ ongoing_loans|length }}</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link rounded-pill px-3 py-1" id="s-fullypaid-tab" data-bs-toggle="tab" data-bs-target="#s-fullypaid-pane" type="button" role="tab">
+                <i class="bi bi-check-circle me-1"></i>Fully Paid <span class="badge bg-light text-dark ms-1">{{ fullypaid_loans|length }}</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link rounded-pill px-3 py-1" id="s-rejected-tab" data-bs-toggle="tab" data-bs-target="#s-rejected-pane" type="button" role="tab">
+                <i class="bi bi-x-circle me-1"></i>Rejected <span class="badge bg-light text-dark ms-1">{{ rejected_loans|length }}</span>
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="staffLoanTabContent">
+        <!-- Pending Approval -->
+        <div class="tab-pane fade show active" id="s-pending-pane" role="tabpanel" tabindex="0">
+            {% if pending_loans %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Applicant</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Tenure</th>
+                            <th>Purpose</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for loan in pending_loans %}
+                        <tr>
+                            <td>{{ loan.username }}<br><small class="text-secondary">{{ loan.email }}</small></td>
+                            <td>{{ loan.type }}</td>
+                            <td class="font-monospace">₹{{ "%.2f"|format(loan.amount) }}</td>
+                            <td>{{ loan.tenure_months }} mo</td>
+                            <td><small>{{ loan.purpose }}</small></td>
+                            <td>
+                                <form method="POST" action="{{ url_for('loan_action', loan_id=loan.id) }}" class="d-flex gap-2">
+                                    <a href="{{ url_for('staff_view_loan_request_details', loan_id=loan.id) }}" class="btn btn-sm btn-info rounded-pill"><i class="bi bi-eye"></i> Details</a>
+                                    <button type="submit" name="action" value="Approve" class="btn btn-sm btn-outline-success rounded-pill">Approve</button>
+                                    <button type="submit" name="action" value="Reject" class="btn btn-sm btn-outline-danger rounded-pill">Reject</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-secondary text-center py-3 mb-0">No pending loan applications.</p>
+            {% endif %}
+        </div>
+
+        <!-- Ongoing -->
+        <div class="tab-pane fade" id="s-ongoing-pane" role="tabpanel" tabindex="0">
+            {% if ongoing_loans %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Applicant</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Tenure</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for loan in ongoing_loans %}
+                        <tr>
+                            <td>{{ loan.username }}<br><small class="text-secondary">{{ loan.email }}</small></td>
+                            <td>{{ loan.type }}</td>
+                            <td class="font-monospace">₹{{ "%.2f"|format(loan.amount) }}</td>
+                            <td>{{ loan.tenure_months }} mo</td>
+                            <td>
+                                <a href="{{ url_for('staff_view_loan_request_details', loan_id=loan.id) }}" class="btn btn-sm btn-outline-info rounded-pill"><i class="bi bi-eye me-1"></i>View Details</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-secondary text-center py-3 mb-0">No ongoing loans.</p>
+            {% endif %}
+        </div>
+
+        <!-- Fully Paid -->
+        <div class="tab-pane fade" id="s-fullypaid-pane" role="tabpanel" tabindex="0">
+            {% if fullypaid_loans %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Applicant</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Tenure</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for loan in fullypaid_loans %}
+                        <tr>
+                            <td>{{ loan.username }}<br><small class="text-secondary">{{ loan.email }}</small></td>
+                            <td>{{ loan.type }}</td>
+                            <td class="font-monospace">₹{{ "%.2f"|format(loan.amount) }}</td>
+                            <td>{{ loan.tenure_months }} mo</td>
+                            <td>
+                                <a href="{{ url_for('staff_view_loan_request_details', loan_id=loan.id) }}" class="btn btn-sm btn-outline-info rounded-pill"><i class="bi bi-eye me-1"></i>View Details</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-secondary text-center py-3 mb-0">No fully paid loans.</p>
+            {% endif %}
+        </div>
+
+        <!-- Rejected -->
+        <div class="tab-pane fade" id="s-rejected-pane" role="tabpanel" tabindex="0">
+            {% if rejected_loans %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Applicant</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Tenure</th>
+                            <th>Purpose</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for loan in rejected_loans %}
+                        <tr>
+                            <td>{{ loan.username }}<br><small class="text-secondary">{{ loan.email }}</small></td>
+                            <td>{{ loan.type }}</td>
+                            <td class="font-monospace">₹{{ "%.2f"|format(loan.amount) }}</td>
+                            <td>{{ loan.tenure_months }} mo</td>
+                            <td><small>{{ loan.purpose }}</small></td>
+                            <td>
+                                <a href="{{ url_for('staff_view_loan_request_details', loan_id=loan.id) }}" class="btn btn-sm btn-outline-secondary rounded-pill"><i class="bi bi-eye me-1"></i>View</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-secondary text-center py-3 mb-0">No rejected loan applications.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

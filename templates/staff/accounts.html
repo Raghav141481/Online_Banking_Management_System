@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Manage <span class="text-gradient">Accounts</span></h2>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="glass-card p-4 mb-4">
+            <h5 class="mb-3">Open New Account</h5>
+            <form method="POST" action="{{ url_for('manage_accounts') }}">
+                <div class="mb-3">
+                    <label class="form-label ms-1">Customer</label>
+                    <select class="form-select rounded-pill px-3" name="user_id" required>
+                        <option value="" disabled selected>Select a customer...</option>
+                        {% for c in customers %}
+                            <option value="{{ c.id }}">{{ c.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label ms-1">Type</label>
+                    <select class="form-select rounded-pill px-3" name="account_type" required>
+                        <option value="Savings">Savings</option>
+                        <option value="Current">Current</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label ms-1">Initial Balance (₹)</label>
+                    <input type="number" step="0.01" value="0.00" class="form-control rounded-pill px-3" name="initial_balance" required>
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary rounded-pill">Create Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="glass-card p-4">
+            <h5 class="mb-4">All System Accounts</h5>
+            <div class="table-responsive">
+                <table class="table  table-hover align-middle flex-nowrap">
+                    <thead>
+                        <tr>
+                            <th>Account No</th>
+                            <th>Customer</th>
+                            <th>Type</th>
+                            <th>Balance</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for acc in accounts %}
+                        <tr>
+                            <td class="font-monospace text-secondary text-nowrap">{{ acc.account_number }}</td>
+                            <td>{{ acc.username }}<br><small class="text-secondary">{{ acc.email }}</small></td>
+                            <td>{{ acc.type }}</td>
+                            <td class="font-monospace">₹{{ "%.2f"|format(acc.balance) }}</td>
+                            <td>
+                                {% if acc.status == 'Active' %}
+                                    <span class="badge bg-success status-badge">Active</span>
+                                {% elif acc.status == 'Pending' %}
+                                    <span class="badge bg-info status-badge">Pending</span>
+                                {% elif acc.status == 'Frozen' %}
+                                    <span class="badge bg-warning text-dark status-badge">Frozen</span>
+                                {% else %}
+                                    <span class="badge bg-secondary status-badge">Closed</span>
+                                {% endif %}
+                            </td>
+                                <div class="d-flex gap-2 align-items-center">
+                                    <a href="{{ url_for('staff_view_account_details', account_id=acc.id) }}" class="btn btn-sm btn-info rounded-pill"><i class="bi bi-eye"></i></a>
+                                    {% if session.get('user_role') == 'Admin' %}
+                                    <a href="{{ url_for('admin_edit_account', account_id=acc.id) }}" class="btn btn-sm btn-primary rounded-pill"><i class="bi bi-pencil"></i></a>
+                                    {% endif %}
+                                    <form method="POST" action="{{ url_for('set_account_status', account_id=acc.id) }}" class="m-0">
+                                        <select class="form-select form-select-sm border-secondary" name="status" onchange="this.form.submit()">
+                                            <option value="Pending" {% if acc.status == 'Pending' %}selected{% endif %}>Pending</option>
+                                            <option value="Active" {% if acc.status == 'Active' %}selected{% endif %}>Active</option>
+                                            <option value="Frozen" {% if acc.status == 'Frozen' %}selected{% endif %}>Frozen</option>
+                                            <option value="Closed" {% if acc.status == 'Closed' %}selected{% endif %}>Closed</option>
+                                        </select>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

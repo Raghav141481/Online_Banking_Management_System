@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold"><i class="bi bi-headset me-2" style="color:var(--accent-rose);"></i>Support <span class="text-gradient-warm">Center</span></h3>
+</div>
+
+<div class="row g-4">
+    <!-- Raise a Ticket -->
+    <div class="col-lg-4">
+        <div class="glass-card p-4 mb-4">
+            <h5 class="mb-3"><i class="bi bi-plus-circle me-2" style="color:var(--accent-teal);"></i>Raise a Ticket</h5>
+            <form method="POST" action="{{ url_for('customer_tickets') }}">
+                <div class="mb-3">
+                    <label class="form-label ms-1">Subject</label>
+                    <input type="text" class="form-control rounded-pill px-4" name="subject" required placeholder="Brief summary...">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label ms-1">Category</label>
+                    <select class="form-select rounded-pill px-4" name="category" required>
+                        <option value="Account Issue">Account Issue</option>
+                        <option value="Transaction Issue">Transaction Issue</option>
+                        <option value="Loan Query">Loan Query</option>
+                        <option value="Card Issue">Card Issue</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label ms-1">Description</label>
+                    <textarea class="form-control rounded-4 px-4 py-2" name="description" rows="4" required placeholder="Describe your issue in detail (min 3 lines)..."></textarea>
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-accent-rose rounded-pill"><i class="bi bi-ticket-detailed me-2"></i>Submit Ticket</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Quick Help -->
+        <div class="glass-card p-4">
+            <h5 class="mb-3"><i class="bi bi-question-circle me-2" style="color:var(--accent-sky);"></i>Quick Help</h5>
+            <div class="accordion" id="faqAccordion">
+                <div class="accordion-item bg-transparent border-0 mb-2">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed bg-transparent  shadow-none py-2 px-3 rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#faq1" style="font-size:.9rem;">
+                            How long does a fund transfer take?
+                        </button>
+                    </h2>
+                    <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body py-2 px-3 text-secondary" style="font-size:.85rem;">
+                            IMPS transfers are instant and available 24x7. All transfers within RANS Bank are processed immediately.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item bg-transparent border-0 mb-2">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed bg-transparent  shadow-none py-2 px-3 rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#faq2" style="font-size:.9rem;">
+                            How do I reset my password?
+                        </button>
+                    </h2>
+                    <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body py-2 px-3 text-secondary" style="font-size:.85rem;">
+                            Please raise a support ticket with the category "Account Issue", and our team will assist you.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr class="border-secondary border-opacity-25 mt-3">
+            <small class="text-secondary d-block"><i class="bi bi-telephone me-1"></i>Helpline: 1800-RANS-BANK</small>
+            <small class="text-secondary d-block mt-1"><i class="bi bi-clock me-1"></i>Mon-Sat: 9AM - 6PM</small>
+        </div>
+    </div>
+
+    <!-- Ticket List -->
+    <div class="col-lg-8">
+        <div class="glass-card p-4">
+            <h5 class="mb-4"><i class="bi bi-card-list me-2 text-secondary"></i>My Tickets</h5>
+            {% if tickets %}
+                {% for t in tickets %}
+                <div class="glass-card-alt p-3 mb-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="font-monospace text-secondary" style="font-size:.8rem;">#{{ "%04d"|format(t.id) }}</span>
+                                {% if t.status == 'Open' %}
+                                    <span class="badge bg-danger bg-opacity-25 text-danger status-badge">Open</span>
+                                {% elif t.status == 'In Progress' %}
+                                    <span class="badge bg-warning bg-opacity-25 text-warning status-badge">In Progress</span>
+                                {% elif t.status == 'Resolved' %}
+                                    <span class="badge bg-success bg-opacity-25 text-success status-badge">Resolved</span>
+                                {% else %}
+                                    <span class="badge bg-secondary bg-opacity-25 text-secondary status-badge">Closed</span>
+                                {% endif %}
+                            </div>
+                            <strong>{{ t.subject }}</strong>
+                            <small class="text-secondary d-block mt-1"><i class="bi bi-tag me-1"></i>{{ t.category }} • {{ t.created_at.strftime('%d %b %Y') }}</small>
+                        </div>
+                        <a href="{{ url_for('view_ticket', ticket_id=t.id) }}" class="btn btn-sm btn-outline-light rounded-pill px-3"><i class="bi bi-chat-dots me-1"></i>View</a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-chat-square-text text-secondary" style="font-size:2.5rem;"></i>
+                <p class="text-secondary mt-3 mb-0">No support tickets found. Need help? Raise a ticket!</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>System <span class="text-gradient">Reports</span></h2>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="glass-card p-4 h-100 border-start border-4 border-info">
+            <small class="text-secondary d-block">Total Customers</small>
+            <h2 class="mb-0  font-monospace">{{ total_customers }}</h2>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-card p-4 h-100 border-start border-4 border-primary">
+            <small class="text-secondary d-block">Total Accounts</small>
+            <h2 class="mb-0  font-monospace">{{ total_accounts }}</h2>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-card p-4 h-100 border-start border-4 border-success">
+            <small class="text-secondary d-block">Total Transaction Volume</small>
+            <h2 class="mb-0  font-monospace">₹{{ "%.2f"|format(total_volume) }}</h2>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-card p-4 h-100 border-start border-4 border-warning">
+            <small class="text-secondary d-block">Active Loans</small>
+            <h2 class="mb-0  font-monospace">{{ active_loans }}</h2>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-card p-4 h-100 border-start border-4 border-secondary">
+            <small class="text-secondary d-block">Pending Loans</small>
+            <h2 class="mb-0  font-monospace">{{ pending_loans }}</h2>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-card p-4 h-100 border-start border-4 border-danger">
+            <small class="text-secondary d-block">Frozen Accounts</small>
+            <h2 class="mb-0  font-monospace">{{ frozen_accounts }}</h2>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="glass-card p-4">
+            <h5 class="mb-4 text-danger">Action Required: Frozen Accounts</h5>
+            {% if frozen_accs_list %}
+            <div class="table-responsive">
+                <table class="table  table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Account No</th>
+                            <th>Customer</th>
+                            <th>Balance</th>
+                            <th>Opened On</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for acc in frozen_accs_list %}
+                        <tr>
+                            <td class="font-monospace text-secondary">{{ acc.account_number }}</td>
+                            <td>{{ acc.username }}</td>
+                            <td class="font-monospace">₹{{ "%.2f"|format(acc.balance) }}</td>
+                            <td>{{ acc.opened_at.strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                <!-- Using existing view in manage accounts feature -->
+                                <form method="POST" action="{{ url_for('set_account_status', account_id=acc.id) }}" class="d-inline">
+                                    <input type="hidden" name="status" value="Active">
+                                    <button type="submit" class="btn btn-sm btn-outline-success rounded-pill">Unfreeze</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-success text-center py-3 mb-0">No frozen accounts in the system.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

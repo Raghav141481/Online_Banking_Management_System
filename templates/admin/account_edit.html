@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold"><i class="bi bi-pencil-square me-2" style="color:var(--accent-amber);"></i>Edit <span class="text-gradient">Account Details</span></h3>
+    <a href="{{ url_for('staff_view_account_details', account_id=account.id) }}" class="btn btn-outline-light rounded-pill px-3 btn-sm"><i class="bi bi-arrow-left me-1"></i>Back to Details</a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <form method="POST" action="{{ url_for('admin_edit_account', account_id=account.id) }}">
+            <!-- Account Information -->
+            <div class="glass-card p-4 mb-4 border-start border-4 border-primary">
+                <h5 class="mb-3"><i class="bi bi-bank me-2"></i>Account Information</h5>
+                <div class="mb-3">
+                    <small class="text-secondary d-block">Account Number (Not Editable)</small>
+                    <span class="fs-5 fw-bold font-monospace">{{ account.account_number }}</span>
+                </div>
+                <div class="mb-3">
+                    <small class="text-secondary d-block">Customer (Not Editable)</small>
+                    <span class="fw-semibold">{{ account.first_name }} {{ account.last_name }} ({{ account.username }})</span>
+                </div>
+                
+                <div class="row g-3">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label ms-1">Account Type</label>
+                        <select class="form-select rounded-pill px-4" name="type" required>
+                            <option value="Savings" {% if account.type == 'Savings' %}selected{% endif %}>Savings</option>
+                            <option value="Current" {% if account.type == 'Current' %}selected{% endif %}>Current</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label ms-1">Status</label>
+                        <select class="form-select rounded-pill px-4" name="status" required>
+                            <option value="Pending" {% if account.status == 'Pending' %}selected{% endif %}>Pending</option>
+                            <option value="Active" {% if account.status == 'Active' %}selected{% endif %}>Active</option>
+                            <option value="Frozen" {% if account.status == 'Frozen' %}selected{% endif %}>Frozen</option>
+                            <option value="Closed" {% if account.status == 'Closed' %}selected{% endif %}>Closed</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label ms-1">Balance</label>
+                    <div class="input-group">
+                        <span class="input-group-text rounded-start-pill px-3 border-0 bg-secondary bg-opacity-10 text-success fw-bold">₹</span>
+                        <input type="number" step="0.01" class="form-control rounded-end-pill px-3 font-monospace" name="balance" value="{{ "%.2f"|format(account.balance) }}" required>
+                    </div>
+                    <div class="form-text ms-2">Manually overriding the balance skips transaction logging. Use with caution.</div>
+                </div>
+            </div>
+
+            <!-- Nominee Details -->
+            <div class="glass-card p-4 mx-auto mb-4 border-start border-4 border-info">
+                <h5 class="mb-3"><i class="bi bi-people me-2"></i>Nominee Details</h5>
+                <div class="row g-3">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label ms-1">Nominee Relation</label>
+                        <input type="text" class="form-control rounded-pill px-4" name="nominee_relation" value="{{ account.nominee_relation or '' }}" placeholder="E.g., Spouse, Child">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label ms-1">Nominee ID Type</label>
+                        <select class="form-select rounded-pill px-4" name="nominee_id_type">
+                            <option value="" {% if not account.nominee_id_type %}selected{% endif %}>None Provided</option>
+                            <option value="Aadhar" {% if account.nominee_id_type == 'Aadhar' %}selected{% endif %}>Aadhar</option>
+                            <option value="PAN" {% if account.nominee_id_type == 'PAN' %}selected{% endif %}>PAN</option>
+                            <option value="Driving License" {% if account.nominee_id_type == 'Driving License' %}selected{% endif %}>Driving License</option>
+                        </select>
+                    </div>
+                    <div class="col-12 mb-3">
+                        <label class="form-label ms-1">Nominee ID Number</label>
+                        <input type="text" class="form-control rounded-pill px-4 font-monospace" name="nominee_id_number" value="{{ account.nominee_id_number or '' }}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end mb-4">
+                <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5"><i class="bi bi-check2-circle me-2"></i>Save Account Details</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

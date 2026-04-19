@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Helpdesk <span class="text-gradient">Tickets</span></h2>
+</div>
+
+<div class="glass-card p-4">
+    {% if tickets %}
+    <div class="table-responsive">
+        <table class="table  table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Ticket ID</th>
+                    <th>Customer</th>
+                    <th>Subject & Category</th>
+                    <th>Status</th>
+                    <th>Created On</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in tickets %}
+                <tr>
+                    <td class="font-monospace text-secondary">#{{ "%04d"|format(t.id) }}</td>
+                    <td>{{ t.username }}</td>
+                    <td>
+                        <strong>{{ t.subject }}</strong><br>
+                        <small class="text-secondary">{{ t.category }}</small>
+                    </td>
+                    <td>
+                        {% if t.status == 'Open' %}
+                            <span class="badge bg-danger status-badge">Open</span>
+                        {% elif t.status == 'In Progress' %}
+                            <span class="badge bg-warning text-dark status-badge">In Prog</span>
+                        {% elif t.status == 'Resolved' %}
+                            <span class="badge bg-success status-badge">Resolved</span>
+                        {% else %}
+                            <span class="badge bg-secondary status-badge">Closed</span>
+                        {% endif %}
+                    </td>
+                    <td><small class="text-secondary">{{ t.created_at.strftime('%Y-%m-%d <br> %H:%M')|safe }}</small></td>
+                    <td>
+                        <a href="{{ url_for('view_ticket', ticket_id=t.id) }}" class="btn btn-sm btn-outline-info rounded-pill">Manage</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="text-secondary">No support tickets in the system.</p>
+    {% endif %}
+</div>
+{% endblock %}
+

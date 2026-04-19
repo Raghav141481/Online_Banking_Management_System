@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-auto">
+        <div class="stat-icon violet mb-0"><i class="bi bi-person-plus"></i></div>
+    </div>
+    <div class="col">
+        <h3 class="fw-bold mb-0">Add Bank Staff</h3>
+        <p class="text-secondary mb-0">Register a new employee into the system</p>
+    </div>
+</div>
+
+<div class="glass-card p-4 mx-auto mb-4" style="max-width: 700px;">
+    <form action="{{ url_for('admin_staff_add') }}" method="POST">
+        <div class="row mb-3">
+            <div class="col-md-6 mb-3 mb-md-0">
+                <label class="form-label form-label-sm">First Name</label>
+                <input type="text" name="first_name" class="form-control border-0 shadow-sm" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label form-label-sm">Last Name</label>
+                <input type="text" name="last_name" class="form-control border-0 shadow-sm" required>
+            </div>
+        </div>
+        
+        <div class="row mb-3">
+            <div class="col-md-6 mb-3 mb-md-0">
+                <label class="form-label form-label-sm">Date of Birth</label>
+                <input type="date" name="dob" class="form-control border-0 shadow-sm" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label form-label-sm">Staff ID Number</label>
+                <input type="text" name="staff_id" class="form-control border-0 shadow-sm" required>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6 mb-3 mb-md-0">
+                <label class="form-label form-label-sm">Gender</label>
+                <select name="gender" class="form-select border-0 shadow-sm">
+                    <option value="" disabled selected>Select gender...</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label form-label-sm">Nationality</label>
+                <select name="nationality" class="form-select border-0 shadow-sm">
+                    <option value="" disabled selected>Select nationality...</option>
+                    <option value="Indian">Indian</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6 mb-3 mb-md-0">
+                <label class="form-label form-label-sm">Mobile Number</label>
+                <input type="text" name="mobile_number" class="form-control border-0 shadow-sm" pattern="\d{10}" maxlength="10" placeholder="10-digit number">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label form-label-sm">Email Address</label>
+                <input type="email" name="email" class="form-control border-0 shadow-sm" required>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label form-label-sm">Address</label>
+            <textarea name="address" class="form-control border-0 shadow-sm" rows="2" placeholder="Full address"></textarea>
+        </div>
+        
+        <hr class="border-secondary border-opacity-25 my-4">
+        
+        <div class="row mb-4">
+            <div class="col-md-6 mb-3 mb-md-0">
+                <label class="form-label form-label-sm">Username</label>
+                <input type="text" name="username" class="form-control border-0 shadow-sm" required minlength="4">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label form-label-sm">Password</label>
+                <input type="password" name="password" class="form-control border-0 shadow-sm" required minlength="8">
+            </div>
+        </div>
+        
+        <div class="d-flex justify-content-end gap-2">
+            <a href="{{ url_for('admin_staff') }}" class="btn btn-outline-secondary rounded-pill px-4 py-2">Cancel</a>
+            <button type="submit" class="btn btn-primary rounded-pill px-4 py-2">Create Staff Account</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

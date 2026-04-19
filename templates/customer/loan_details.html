@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold"><i class="bi bi-bank2 me-2" style="color:var(--accent-amber);"></i>Loan <span class="text-gradient-warm">Details</span></h3>
+    <a href="{{ url_for('customer_loans') }}" class="btn btn-outline-light rounded-pill px-3 btn-sm"><i class="bi bi-arrow-left me-1"></i>Back to Loans</a>
+</div>
+
+<!-- Loan Info Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3 col-6">
+        <div class="stat-card violet">
+            <small class="text-secondary d-block mb-1">Loan Type</small>
+            <h5 class="mb-0 fw-bold">{{ loan.type }}</h5>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card amber">
+            <small class="text-secondary d-block mb-1">Sanctioned Amount</small>
+            <h5 class="mb-0 font-monospace fw-bold">₹{{ "%.2f"|format(loan.amount) }}</h5>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card teal">
+            <small class="text-secondary d-block mb-1">Tenure</small>
+            <h5 class="mb-0 fw-bold">{{ loan.tenure_months }} months</h5>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card {% if loan.status == 'Ongoing' %}emerald{% elif loan.status == 'Fully Paid' %}teal{% elif loan.status == 'Rejected' %}rose{% else %}amber{% endif %}">
+            <small class="text-secondary d-block mb-1">Status</small>
+            <h5 class="mb-0 fw-bold">{{ loan.status }}</h5>
+        </div>
+    </div>
+</div>
+
+{% if loan.status in ['Ongoing', 'Fully Paid'] %}
+<!-- Financial Summary Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3 col-6">
+        <div class="stat-card emerald">
+            <small class="text-secondary d-block mb-1">Total Amount Paid</small>
+            <h5 class="mb-0 font-monospace fw-bold">₹{{ "%.2f"|format(total_paid) }}</h5>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card rose">
+            <small class="text-secondary d-block mb-1">Remaining Outstanding</small>
+            <h5 class="mb-0 font-monospace fw-bold">₹{{ "%.2f"|format(remaining_amount) }}</h5>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card violet">
+            <small class="text-secondary d-block mb-1">Interest Paid So Far</small>
+            <h5 class="mb-0 font-monospace fw-bold">₹{{ "%.2f"|format(total_interest_paid) }}</h5>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card {% if next_emi_due %}amber{% else %}teal{% endif %}">
+            <small class="text-secondary d-block mb-1">Next EMI Due Date</small>
+            <h5 class="mb-0 fw-bold">
+                {% if next_emi_due %}
+                    {{ next_emi_due.strftime('%d %b %Y') }}
+                {% else %}
+                    — All Paid
+                {% endif %}
+            </h5>
+        </div>
+    </div>
+</div>
+
+<!-- Repayment Progress -->
+{% set paid_count = schedule|selectattr('status', 'equalto', 'Paid')|list|length %}
+{% set total_count = schedule|length %}
+{% set progress_pct = (paid_count / total_count * 100) if total_count > 0 else 0 %}
+
+<div class="glass-card p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0"><i class="bi bi-graph-up me-2" style="color:var(--accent-emerald);"></i>Repayment Progress</h5>
+        <span class="text-secondary">Total Payable: <span class="font-monospace fw-bold ">₹{{ "%.2f"|format(loan.total_payable) }}</span></span>
+    </div>
+    <div class="d-flex justify-content-between mb-2">
+        <small class="text-secondary">{{ paid_count }} of {{ total_count }} EMIs paid</small>
+        <small class="fw-bold" style="color:var(--accent-emerald);">{{ "%.0f"|format(progress_pct) }}%</small>
+    </div>
+    <div class="progress-custom">
+        <div class="bar emerald" style="width: {{ progress_pct }}%;"></div>
+    </div>
+</div>
+
+<!-- Pay All Button for Ongoing Loans -->
+{% if loan.status == 'Ongoing' %}
+{% set unpaid_emis = schedule|selectattr('status', 'equalto', 'Pending')|list %}
+{% set unpaid_total = unpaid_emis|sum(attribute='amount') %}
+<div class="glass-card p-4 mb-4 border-start border-4 border-warning">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="mb-1"><i class="bi bi-lightning-charge-fill me-2" style="color:var(--accent-amber);"></i>Full Loan Closure</h5>
+            <p class="text-secondary mb-0">Pay all {{ unpaid_emis|length }} remaining EMIs in a single payment of <span class="fw-bold font-monospace">₹{{ "%.2f"|format(unpaid_total) }}</span></p>
+        </div>
+        <form method="POST" action="{{ url_for('pay_all_emis', loan_id=loan.id) }}" class="d-inline-flex gap-2 align-items-center" onsubmit="return confirm('Are you sure you want to pay all remaining EMIs totalling ₹{{ '%.2f'|format(unpaid_total) }}?');">
+            <select class="form-select form-select-sm w-auto rounded-pill" name="account_id" required>
+                <option value="" disabled selected>Select Account</option>
+                {% for acc in accounts %}
+                    <option value="{{ acc.id }}">**** {{ acc.account_number[-4:] }} (₹{{ "%.2f"|format(acc.balance) }})</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-accent-amber rounded-pill px-4"><i class="bi bi-check2-all me-1"></i>Pay All</button>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<!-- EMI Schedule -->
+<div class="glass-card p-4">
+    <h5 class="mb-4"><i class="bi bi-calendar3 me-2 text-secondary"></i>EMI Schedule</h5>
+    <div class="table-responsive">
+        <table class="table  table-hover align-middle mb-0">
+            <thead>
+                <tr class="text-secondary">
+                    <th><small>EMI #</small></th>
+                    <th><small>DUE DATE</small></th>
+                    <th><small>EMI AMOUNT</small></th>
+                    <th><small>STATUS</small></th>
+                    <th><small>ACTION</small></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in schedule %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ row.due_date.strftime('%d %b %Y') }}</td>
+                    <td class="font-monospace fw-semibold">₹{{ "%.2f"|format(row.amount) }}</td>
+                    <td>
+                        {% if row.status == 'Paid' %}
+                            <span class="badge bg-success bg-opacity-25 text-success status-badge"><i class="bi bi-check-circle me-1"></i>Paid {{ row.paid_date.strftime('%d %b') }}</span>
+                        {% else %}
+                            <span class="badge bg-warning bg-opacity-25 text-warning status-badge"><i class="bi bi-clock me-1"></i>Unpaid</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if row.status == 'Pending' %}
+                        <form method="POST" action="{{ url_for('pay_emi', emi_id=row.id) }}" class="d-inline-flex gap-2">
+                            <select class="form-select form-select-sm w-auto   rounded-pill" name="account_id" required>
+                                <option value="" disabled selected>Account</option>
+                                {% for acc in accounts %}
+                                    <option value="{{ acc.id }}">**** {{ acc.account_number[-4:] }} (₹{{ "%.2f"|format(acc.balance) }})</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-accent-emerald rounded-pill px-3">Pay</button>
+                        </form>
+                        {% else %}
+                            <span class="text-secondary">—</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

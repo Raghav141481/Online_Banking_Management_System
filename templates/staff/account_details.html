@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-auto">
+        <div class="stat-icon info mb-0"><i class="bi bi-wallet2"></i></div>
+    </div>
+    <div class="col">
+        <h3 class="fw-bold mb-0">Account Details</h3>
+        <p class="text-secondary mb-0">Comprehensive view of account info, customer details and transactions</p>
+    </div>
+    <div class="col-auto">
+        {% if session.get('user_role') == 'Admin' %}
+        <a href="{{ url_for('admin_edit_account', account_id=account.id) }}" class="btn btn-primary rounded-pill px-3 me-2"><i class="bi bi-pencil me-1"></i>Edit Account</a>
+        {% endif %}
+        <a href="{{ url_for('manage_accounts') }}" class="btn btn-outline-secondary rounded-pill px-3"><i class="bi bi-arrow-left me-1"></i>Back to Accounts</a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <!-- Account Info -->
+        <div class="glass-card p-4 mb-4 border-start border-4 border-info">
+            <h5 class="mb-3"><i class="bi bi-info-circle me-2"></i>Account Info</h5>
+            <div class="mb-3">
+                <small class="text-secondary d-block">Account Number</small>
+                <span class="fs-5 fw-bold font-monospace">{{ account.account_number }}</span>
+            </div>
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <small class="text-secondary d-block">Type</small>
+                    <span class="fw-semibold">{{ account.type }}</span>
+                </div>
+                <div class="col-6">
+                    <small class="text-secondary d-block">Status</small>
+                    {% if account.status == 'Active' %}
+                        <span class="badge bg-success status-badge">Active</span>
+                    {% elif account.status == 'Pending' %}
+                        <span class="badge bg-info status-badge">Pending</span>
+                    {% elif account.status == 'Frozen' %}
+                        <span class="badge bg-warning text-dark status-badge">Frozen</span>
+                    {% else %}
+                        <span class="badge bg-secondary status-badge">Closed</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="mb-3">
+                <small class="text-secondary d-block">Balance</small>
+                <span class="fs-4 fw-bold text-success font-monospace">₹{{ "%.2f"|format(account.balance) }}</span>
+            </div>
+            <div class="mb-2">
+                <small class="text-secondary d-block">Opened On</small>
+                <span class="fw-semibold">{{ account.opened_at.strftime('%Y-%m-%d %H:%M') }}</span>
+            </div>
+        </div>
+
+        <!-- Customer Identity -->
+        <div class="glass-card p-4">
+            <h5 class="mb-3"><i class="bi bi-person-badge me-2"></i>Customer Identity</h5>
+            <ul class="list-unstyled mb-0">
+                <li class="mb-2">
+                    <small class="text-secondary d-block">Full Name</small>
+                    <span class="fw-semibold">{{ user.first_name }} {{ user.last_name }}</span>
+                </li>
+                <li class="mb-2">
+                    <small class="text-secondary d-block">Username</small>
+                    <span class="fw-semibold">{{ user.username }}</span>
+                </li>
+                <li class="mb-2">
+                    <small class="text-secondary d-block">Email</small>
+                    <span class="fw-semibold">{{ user.email }}</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <!-- Account Transactions -->
+        <div class="glass-card p-4 mb-4">
+            <h5 class="mb-3"><i class="bi bi-arrow-left-right me-2"></i>Recent Transactions (Up to 20)</h5>
+            {% if transactions %}
+            <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                <table class="table table-sm table-hover align-middle">
+                    <thead class="sticky-top bg-white">
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Partner A/C</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tx in transactions %}
+                        <tr>
+                            <td class="text-secondary"><small>{{ tx.timestamp.strftime('%Y-%m-%d') }}</small></td>
+                            <td><small>{{ tx.description }}</small></td>
+                            <td class="font-monospace text-secondary">
+                                <small>
+                                {% if tx.direction == 'Debit' %}
+                                    {{ tx.receiver_acc_num or '-' }}
+                                {% else %}
+                                    {{ tx.sender_acc_num or '-' }}
+                                {% endif %}
+                                </small>
+                            </td>
+                            <td>
+                                {% if tx.direction == 'Credit' %}
+                                    <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50">CREDIT</span>
+                                {% else %}
+                                    <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50">DEBIT</span>
+                                {% endif %}
+                            </td>
+                            <td class="font-monospace">
+                                {% if tx.direction == 'Credit' %}
+                                    <span class="text-success">+₹{{ "%.2f"|format(tx.amount) }}</span>
+                                {% else %}
+                                    <span class="text-danger">-₹{{ "%.2f"|format(tx.amount) }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-secondary mb-0">No transactions recorded yet.</p>
+            {% endif %}
+        </div>
+        
+        <!-- Loans taken by this customer -->
+        <div class="glass-card p-4">
+            <h5 class="mb-3"><i class="bi bi-bank me-2"></i>Customer's Loans</h5>
+            {% if loans %}
+            {% set pending_loans = loans|selectattr('status', 'equalto', 'Pending Approval')|list %}
+            {% set ongoing_loans = loans|selectattr('status', 'equalto', 'Ongoing')|list %}
+            {% set fullypaid_loans = loans|selectattr('status', 'equalto', 'Fully Paid')|list %}
+            {% set rejected_loans = loans|selectattr('status', 'equalto', 'Rejected')|list %}
+            
+            <ul class="nav nav-pills mb-3 gap-2 flex-wrap" id="custLoanTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active rounded-pill px-3 py-1" id="cl-ongoing-tab" data-bs-toggle="tab" data-bs-target="#cl-ongoing-pane" type="button" role="tab">
+                        Ongoing <span class="badge bg-light text-dark ms-1">{{ ongoing_loans|length }}</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link rounded-pill px-3 py-1" id="cl-pending-tab" data-bs-toggle="tab" data-bs-target="#cl-pending-pane" type="button" role="tab">
+                        Pending <span class="badge bg-light text-dark ms-1">{{ pending_loans|length }}</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link rounded-pill px-3 py-1" id="cl-fullypaid-tab" data-bs-toggle="tab" data-bs-target="#cl-fullypaid-pane" type="button" role="tab">
+                        Fully Paid <span class="badge bg-light text-dark ms-1">{{ fullypaid_loans|length }}</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link rounded-pill px-3 py-1" id="cl-rejected-tab" data-bs-toggle="tab" data-bs-target="#cl-rejected-pane" type="button" role="tab">
+                        Rejected <span class="badge bg-light text-dark ms-1">{{ rejected_loans|length }}</span>
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="custLoanTabContent">
+                {% macro loan_table(loan_list, empty_msg) %}
+                {% if loan_list %}
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Tenure</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for loan in loan_list %}
+                            <tr>
+                                <td>{{ loan.type }}</td>
+                                <td class="font-monospace">₹{{ "%.2f"|format(loan.amount) }}</td>
+                                <td>{{ loan.tenure_months }} mo</td>
+                                <td>
+                                    {% if loan.status == 'Ongoing' %}
+                                        <span class="badge bg-success">Ongoing</span>
+                                    {% elif loan.status == 'Fully Paid' %}
+                                        <span class="badge bg-info">Fully Paid</span>
+                                    {% elif loan.status == 'Rejected' %}
+                                        <span class="badge bg-danger">Rejected</span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark">Pending Approval</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('staff_view_loan_request_details', loan_id=loan.id) }}" class="btn btn-sm btn-outline-info rounded-pill px-3"><i class="bi bi-eye me-1"></i>View Details</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-secondary text-center py-3 mb-0">{{ empty_msg }}</p>
+                {% endif %}
+                {% endmacro %}
+
+                <div class="tab-pane fade show active" id="cl-ongoing-pane" role="tabpanel" tabindex="0">
+                    {{ loan_table(ongoing_loans, "No ongoing loans.") }}
+                </div>
+                <div class="tab-pane fade" id="cl-pending-pane" role="tabpanel" tabindex="0">
+                    {{ loan_table(pending_loans, "No pending loan applications.") }}
+                </div>
+                <div class="tab-pane fade" id="cl-fullypaid-pane" role="tabpanel" tabindex="0">
+                    {{ loan_table(fullypaid_loans, "No fully paid loans.") }}
+                </div>
+                <div class="tab-pane fade" id="cl-rejected-pane" role="tabpanel" tabindex="0">
+                    {{ loan_table(rejected_loans, "No rejected loans.") }}
+                </div>
+            </div>
+            {% else %}
+            <p class="text-secondary mb-0">No loans for this customer.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
