@@ -1,4 +1,4 @@
-# RANS Bank — Online Banking Management System
+# RANS Bank — Online Banking Management System (UG Level)
 
 A full-featured, web-based banking management system built as a DBMS project. It supports multi-role access for Customers, Bank Staff, and Admins, with secure session-based authentication, loan management with EMI tracking, fund transfers, beneficiary management, and a built-in help & support ticketing system.
 
